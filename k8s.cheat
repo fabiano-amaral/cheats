@@ -1,0 +1,260 @@
+% kubectl, kubernetes, k, k8s 
+
+# Check what human user authorized to do
+kubectl auth auth can-i <subcommand> <resource> --as <optional_username> # Check what service user authorized to do
+kubectl auth can-i <subcommand> <resource> --as system:serviceaccount:<namespace>:<service_user_name> -n <target_namespace>
+##############
+##Certificate
+##############
+
+# Approve a certificate signing request. CSR. kubectl certificate approve <csr_name>
+
+
+##############
+##Config
+##############
+
+# View Kubectl config file
+kubectl config view
+
+# Switch default namespace
+kubectl config set-context --current --namespace=<some_namespace>
+$ some_namespace:  kubectl get ns | awk 'NR !=1 {print $1}'
+
+##############
+##Delete
+##############
+# Delete service
+kubectl delete svc <service_name>
+$ name: kubectl get svc | awk 'NR !=1 {print $1}'
+# Delete pod
+kubectl delete pod <pod_name>
+$ name: kubectl get pods | awk 'NR !=1 {print $1}'
+##############
+##Describe
+##############
+# Describe. Get all information about pod
+kubectl describe pod <pod_name>
+$ name: kubectl get pods | awk 'NR !=1 {print $1}'
+
+# Describe service
+kubectl describe svc <service_name>
+$ name: kubectl get services | awk 'NR !=1 {print $1}'
+# Describe cluster role
+kubectl describe clusterrole <name>
+
+# Describe cluster role binding
+kubectl describe clusterrolebinding <name>
+
+# Describe service account
+kubectl describe serviceaccount <service_account_name>
+$ name: kubectl get sa | awk 'NR !=1 {print $2}'
+
+##############
+##Exec
+##############
+
+# Execute command. Optionally selecting container
+kubectl exec <pod_name> --container <container_name> -- <command>
+
+# Go inside pod. Go inside container
+kubectl exec -it <pod_name> --container <container_name> -- bash
+
+# Get keyset stored in etcd
+kubectl exec etcd-master -n kube-system etcdctl get / --prefix -keys-only
+
+##############
+##Get
+##############
+
+# Get all nodes
+kubectl get nodes -o wide
+
+# Watch nodes continuously
+kubectl get nodes -w
+
+# Get all namespaces
+kubectl get all --all-namespaces
+
+# Get all resources
+kubectl get all -o wide --show-labels
+
+# Get all ReplicaSets
+kubectl get rs -o wide --show-labels
+
+# Get services
+kubectl get svc -o wide --show-labels
+
+# Get ingress
+kubectl get ing
+
+# Get deployments
+kubectl get deployments -o wide --show-labels
+
+# Get all pods
+kubectl get pods -n <namespace_name> -o wide --show-labels
+
+# Get all information about pods
+kubectl get pods -o yaml
+
+# Get pods behind the service
+kubectl get ep <service_name>  
+$ service_name: kubectl get svc | awk 'NR !=1 {print $1}'
+
+# Get pods IPs behind the service
+kubectl get ep
+
+# Get namespaces
+kubectl get ns
+
+# Get endpoints
+kubectl get ep --show-labels
+
+# Get the whole config file
+kubectl get <k8s_component> <name> -o yaml
+
+# Filter by label
+kubectl get <k8s_component> -l <key_eq_value>
+
+# Get certificate signing requests. CSR.
+kubectl get csr
+# Get cluster roles
+kubectl get clusterrole
+
+# Get cluter role binding
+kubectl get clusterrolebinding
+
+# Get secrets
+kubectl get secret
+
+# Get secret token
+kubectl get secret <name> -o yaml
+$ name: kubectl get secret | awk 'NR !=1 {print $1}'
+
+# Get persistence volume
+kubectl get pv
+
+# Get persistence volume claim
+kubectl get pvc
+
+# Get networkpolicy
+kubectl get networkpolicy -n <namespace>
+
+# Filter k8s resources by label
+kubectl get <k8s_resource> --selector <label_key>=<label_val>
+
+##############
+##Custom Columns
+##############
+
+# Get containers names within a pod
+kubectl get pod <name> -o custom-columns=CONTAINER_NAME:.spec.containers[*].name
+
+# Get pod names, IPs, and startTime with jsonpath
+kubectl get pod -o custom-columns=POD_NAME:.metadata.name,POD_IP:.status.podIP,CREATED_AT:.status.startTime
+##############
+##Label
+##############
+# Label a node
+kubectl label node <name> <label_key>=<label_value> --record=true
+
+##############
+##Logs
+##############
+
+# Get logs from the pod. Optionally container
+kubectl logs --follow <pod_name> --container <container_name>
+
+# Get logs from pod replicas by label
+kubectl logs -l <key_eq_value>
+
+##############
+##Maintenance
+##############
+
+# Drain node in preparation for maintenance
+kubectl drain <node_name>
+
+# Mark node as schedulable
+kubectl uncordon <node_name>
+
+# Mark node as unschedulable (won't drain pods)
+kubectl cordon <node_name>
+
+##############
+##Rollout
+##############
+
+# Roll back deployment to previous release
+kubectl rollout undo deployment/<deployment_name>
+
+# Get deployment roll out history
+kubectl rollout history deployments/<deployment_name>
+
+# Check deployment roll out status
+kubectl rollout status deployments/<deployment_name>
+
+# Restart deployment or stateful set
+kubectl rollout restart deployment/<deployment_name>
+
+##############
+##Scale
+##############
+
+# Scale deployment
+kubectl scale deployment <deployment_name> --replicas <how_many> --record
+
+##############
+##Taint
+##############
+
+# Taint a node. (taint-effect -> what happen to POD that DO NOT TOLERATE this taint)
+kubectl taint nodes <node_name> <key>=<value>:<taint_effect>
+
+# Remove a taint from a node
+kubectl taint nodes <node_name> <key>=<value>:<taint_effect>-
+
+##############
+##Troubleshooting
+##############
+
+# Is Service forwarding the requests. Is Pod registered with service
+kubectl describe svc <service_name>
+
+# Is Service accessible
+nc <service_ip> <port>
+
+# Check Application Logs
+kubectl logs <pod_name>
+
+# Check Pod Status and recent events
+kubectl describe pod <pod_name>
+
+# Show metrics for nodes
+kubectl top node
+
+# Show metrics for pods
+kubectl top pod
+
+# Get Pods with no explicit resources definitions
+kubectl get pod -o jsonpath="{range .items[*]}{.metadata.name}{.spec.containers[*].resources}{'\n'}"
+
+# Check open ports
+kubectl exec <pod_name> -- sh -c 'nc -v <destination_pod_ip> <port>' 
+
+# Debug with busybox pod
+kubectl run debug-pod --image=busybox
+
+##############
+##Version
+##############
+
+# Get version information
+kubectl version --output=yaml
+
+$ node_name: kubectl get nodes | awk 'NR!=1 { print $1 }'
+$ pod_name: kubectl get pods | awk 'NR !=1 {print $1}'
+$ container_name:  kubectl get pods -o jsonpath="{.items[*].spec.containers[*].name}"
+$ deployment_name: kubectl get deployments | awk 'NR!=1 { print $1 }'
+$ namespace_name: kubectl get ns | awk 'NR !=1 {print $1}'
+$ node_name: kubectl get nodes | awk 'NR!=1 { print $1 }'
